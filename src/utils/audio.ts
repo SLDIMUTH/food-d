@@ -20,9 +20,14 @@ class SoundEngine {
   private getContext(): AudioContext | null {
     if (!this.soundEnabled) return null;
     if (!this.ctx && typeof window !== 'undefined') {
-      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      if (AudioContextClass) {
-        this.ctx = new AudioContextClass();
+      try {
+        const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        if (AudioContextClass) {
+          this.ctx = new AudioContextClass();
+        }
+      } catch {
+        // AudioContext instantiation may be restricted by security policies
+        this.ctx = null;
       }
     }
     if (this.ctx && this.ctx.state === 'suspended') {
