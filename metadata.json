@@ -1,0 +1,8 @@
+{
+  "name": "The Elite Grill",
+  "description": "Artisanal Wood-Fired Smokehouse — Charcoal grilled prime cuts, handcrafted skewers, and fine dining reservation experience.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
