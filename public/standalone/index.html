@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Elite Grill | Artisanal Wood-Fired Smokehouse</title>
+  <meta name="description" content="Artisanal Wood-Fired Smokehouse — Charcoal grilled prime cuts, handcrafted skewers, and fine dining reservation experience. Masterminded by Shanaka Dimuth." />
+
+  <!-- Google Fonts: Cinzel, Playfair Display, Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Cinzel"', 'serif'],
+            serif: ['"Playfair Display"', 'serif'],
+          },
+          colors: {
+            amber: {
+              300: '#fcd34d',
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+              700: '#b45309',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons & Confetti Library -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <!-- External Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="bg-[#0a0a0c] text-zinc-100 font-sans antialiased selection:bg-amber-500 selection:text-black min-h-screen overflow-x-hidden">
+
+  <!-- Floating Embers Realistic Canvas -->
+  <canvas id="emberCanvas" class="fixed inset-0 pointer-events-none z-10 opacity-75"></canvas>
+
+  <!-- 1. INTRO PRELOADER -->
+  <div id="preloader" class="fixed inset-0 z-50 bg-[#070709] flex flex-col items-center justify-center p-6 select-none transition-opacity duration-700">
+    <div class="relative flex items-center justify-center w-36 h-36 mb-8">
+      <div class="absolute inset-0 rounded-full border border-amber-500/20 animate-ping"></div>
+      <div class="absolute inset-2 rounded-full border border-dashed border-amber-500/40 animate-spin" style="animation-duration: 9s;"></div>
+      <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-amber-600/30 via-amber-500/20 to-yellow-400/10 border border-amber-500/50 flex items-center justify-center shadow-[0_0_50px_rgba(245,158,11,0.3)]">
+        <i data-lucide="flame" class="w-12 h-12 text-amber-400 animate-bounce"></i>
+      </div>
+    </div>
+    <div class="text-center space-y-2 mb-8 max-w-sm">
+      <h1 class="font-display text-2xl sm:text-3xl font-black tracking-widest text-white">THE ELITE GRILL</h1>
+      <p class="text-xs tracking-[0.28em] font-bold text-amber-400 uppercase">Wood-Fired Smokehouse</p>
+      <p id="preloaderTip" class="text-xs text-zinc-400 italic pt-2">"Igniting white oak charcoal to 850°F searing temperature..."</p>
+    </div>
+    <div class="w-64 sm:w-72 h-2 bg-zinc-900 rounded-full overflow-hidden border border-zinc-800 mb-4">
+      <div id="preloaderBar" class="h-full bg-gradient-to-r from-amber-600 via-amber-400 to-yellow-300 w-0 transition-all duration-200"></div>
+    </div>
+    <div class="flex items-center justify-between w-64 sm:w-72 text-[11px] text-zinc-500 uppercase font-mono">
+      <span>Coal Hearth Ignition</span>
+      <span id="preloaderPercent" class="text-amber-400 font-bold">0%</span>
+    </div>
+    <button id="skipPreloaderBtn" class="mt-8 px-5 py-2 rounded-full border border-zinc-800 text-zinc-400 hover:text-white hover:border-amber-500/50 text-xs transition active:scale-95">
+      Skip Ignition &rarr;
+    </button>
+  </div>
+
+  <!-- 2. TOP UTILITY BAR & MAIN NAVBAR -->
+  <header class="fixed top-0 left-0 right-0 z-40 bg-[#0a0a0c]/95 backdrop-blur-md border-b border-zinc-800/80">
+    <!-- Top info bar -->
+    <div class="hidden lg:flex items-center justify-between px-6 py-1.5 text-xs text-zinc-400 border-b border-zinc-900 bg-black/60 overflow-hidden">
+      <div class="flex items-center gap-3 shrink-0">
+        <span class="flex items-center gap-2 text-amber-400 font-semibold text-xs tracking-wide">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-sm shadow-emerald-400/50"></span>
+          <span id="topBarLiveHearth">Open Hearth Kitchen Live</span>
+        </span>
+        <span class="text-zinc-700">•</span>
+        <span class="flex items-center gap-1.5 text-zinc-400 text-xs">
+          <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-500"></i>
+          <span>12:00 PM – 11:30 PM Daily</span>
+        </span>
+        <span class="text-zinc-700">•</span>
+        <span class="flex items-center gap-1.5 text-zinc-400 text-xs">
+          <i data-lucide="map-pin" class="w-3.5 h-3.5 text-amber-500"></i>
+          <span>42 Grand Hearth Ave, Culinary District</span>
+        </span>
+      </div>
+
+      <div class="flex items-center gap-3.5 shrink-0">
+        <!-- Language Switcher -->
+        <button id="langToggleBtn" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/90 border border-zinc-700/70 hover:border-amber-500/60 text-[11px] font-bold text-amber-300 transition">
+          <i data-lucide="languages" class="w-3.5 h-3.5"></i>
+          <span id="langText">සිංහල / English</span>
+        </button>
+
+        <span class="text-zinc-700">•</span>
+
+        <!-- Pairing Guide Quick Action -->
+        <button id="topPairingBtn" class="flex items-center gap-1.5 text-zinc-300 hover:text-amber-400 transition-colors text-[11px] font-semibold">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span id="topPairingText">Sommelier Pairings</span>
+        </button>
+
+        <span class="text-zinc-700">•</span>
+
+        <!-- Audio Sound Toggle -->
+        <button id="soundToggleBtn" class="flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors text-[11px]">
+          <i id="soundIcon" data-lucide="volume-2" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span id="soundText" class="text-amber-300 font-semibold">Sound: ON</span>
+        </button>
+
+        <span class="text-zinc-700">•</span>
+
+        <a href="tel:+18005554745" class="flex items-center gap-1 text-zinc-300 hover:text-amber-400 transition-colors text-[11px]">
+          <i data-lucide="phone" class="w-3.5 h-3.5 text-amber-500"></i>
+          <span>+1 (800) 555-GRILL</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <!-- Logo -->
+      <a href="#home" class="flex items-center gap-3 group shrink-0">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 p-0.5 flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:shadow-amber-500/40 transition-all">
+          <div class="w-full h-full bg-[#0d0d10] rounded-[10px] flex items-center justify-center">
+            <i data-lucide="flame" class="w-6 h-6 text-amber-400 group-hover:scale-110 transition-transform"></i>
+          </div>
+        </div>
+        <div>
+          <span class="font-display text-xl sm:text-2xl font-bold tracking-wider text-white group-hover:text-amber-400 transition-colors">
+            The Elite Grill
+          </span>
+          <span class="block text-[10px] tracking-[0.25em] text-amber-400 font-semibold uppercase">
+            Wood-Fired Smokehouse
+          </span>
+        </div>
+      </a>
+
+      <!-- Nav Links -->
+      <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-zinc-300">
+        <a href="#home" id="navLinkHome" class="hover:text-amber-400 transition-colors">Home</a>
+        <a href="#craft" id="navLinkCraft" class="hover:text-amber-400 transition-colors">Craft of Fire</a>
+        <a href="#about" id="navLinkAbout" class="hover:text-amber-400 transition-colors">Our Heritage</a>
+        <a href="#menu" id="navLinkMenu" class="hover:text-amber-400 transition-colors">Master Menu</a>
+        <a href="#reviews" id="navLinkReviews" class="hover:text-amber-400 transition-colors">Reviews</a>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2.5 sm:gap-3">
+        <!-- Simulator trigger -->
+        <button id="navSimulatorBtn" class="hidden lg:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-600/20 to-amber-500/10 border border-amber-500/30 hover:border-amber-400 text-amber-300 hover:text-amber-200 text-xs font-semibold transition">
+          <i data-lucide="flame" class="w-4 h-4 text-amber-400"></i>
+          <span id="navSimText">Grill Simulator</span>
+        </button>
+
+        <!-- Book a Table trigger -->
+        <button id="navReservationBtn" class="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-800/80 hover:bg-zinc-700 text-white text-xs font-semibold border border-zinc-700/60 transition shadow-sm">
+          <i data-lucide="calendar" class="w-4 h-4 text-amber-400"></i>
+          <span id="navBookText">Book a Table</span>
+        </button>
+
+        <!-- Cart Drawer Toggle -->
+        <button id="cartBtn" class="relative p-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-semibold transition shadow-lg shadow-amber-500/20 active:scale-95">
+          <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+          <span id="cartBadge" class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-bold flex items-center justify-center border-2 border-[#0a0a0c]">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 3. HERO SECTION -->
+  <section id="home" class="relative pt-36 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <!-- Left Hero Copy -->
+        <div class="lg:col-span-7 space-y-6">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span id="heroBadge">Michelin-Recognized Wood Smoke Masterclass</span>
+          </div>
+
+          <h1 id="heroHeading" class="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.12]">
+            Artisanal Fire & <br />
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500">
+              Smokehouse Feasts.
+            </span>
+          </h1>
+
+          <p id="heroSubtitle" class="text-zinc-300 text-base sm:text-lg max-w-xl leading-relaxed">
+            Experience hand-carved Wagyu ribeyes, rosemary-skewered lamb, and wild prawns seared to perfection over French oak and white Binchotan embers.
+          </p>
+
+          <div class="flex flex-wrap gap-3.5 pt-2">
+            <a href="#menu" id="heroExploreBtn" class="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-black font-bold text-sm shadow-xl shadow-amber-500/20 transition flex items-center gap-2 active:scale-95">
+              <span>Explore Master Menu</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+
+            <button id="heroReservationBtn" class="px-6 py-3.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 text-white font-semibold text-sm border border-zinc-700/80 hover:border-amber-500/40 transition flex items-center gap-2 active:scale-95">
+              <i data-lucide="calendar" class="w-4 h-4 text-amber-400"></i>
+              <span id="heroReserveText">Reserve Table</span>
+            </button>
+
+            <button id="heroSimulatorBtn" class="px-4 py-3.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 font-semibold text-xs border border-amber-500/30 transition flex items-center gap-2">
+              <i data-lucide="flame" class="w-4 h-4 text-amber-400"></i>
+              <span id="heroSimText">Test Grill Sear</span>
+            </button>
+
+            <button id="heroPairingBtn" class="px-4 py-3.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-amber-300 font-semibold text-xs border border-zinc-700/70 hover:border-amber-500/40 transition flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span id="heroPairingText">Sommelier Guide</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Hero Signature Card -->
+        <div class="lg:col-span-5 relative">
+          <div class="relative rounded-3xl overflow-hidden border border-amber-500/30 shadow-2xl bg-zinc-900 group">
+            <img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80" alt="Wood Fired Wagyu Ribeye" class="w-full h-[460px] object-cover group-hover:scale-105 transition-transform duration-700" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+            
+            <div class="absolute bottom-6 left-6 right-6 p-5 rounded-2xl bg-[#111116]/95 backdrop-blur-md border border-amber-500/30 shadow-xl">
+              <div class="flex items-center justify-between mb-2">
+                <span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold uppercase tracking-wider border border-amber-500/30">
+                  Chef's Signature
+                </span>
+                <span class="text-amber-400 font-bold text-lg font-display">$38.00</span>
+              </div>
+              <h3 class="font-display text-lg font-bold text-white">45-Day Dry-Aged Wagyu Ribeye</h3>
+              <p class="text-xs text-zinc-300 mt-1 line-clamp-2">Charred with garlic herb tallow butter and Maldon sea salt flakes over oak coal.</p>
+              
+              <div class="grid grid-cols-2 gap-2 mt-4">
+                <button onclick="openDishDetailModal('skewer-02')" class="py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold transition border border-zinc-700">
+                  Custom Options
+                </button>
+                <button onclick="addToCartQuick('skewer-02')" class="py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs tracking-wide transition flex items-center justify-center gap-1 shadow-md shadow-amber-500/20">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                  <span>Quick Add</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. CRAFT OF FIRE & WOOD SMOKE SECTION -->
+  <section id="craft" class="py-24 bg-[#0a0a0d] border-t border-zinc-800/80 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase tracking-wider">
+          <i data-lucide="flame" class="w-3.5 h-3.5"></i>
+          <span id="craftBadge">The Art of Fire & Smoke</span>
+        </div>
+        <h2 id="craftHeading" class="font-display text-3xl sm:text-4xl font-bold text-white tracking-tight">
+          Interactive Pitmaster Guide
+        </h2>
+        <p id="craftSubtitle" class="text-zinc-400 text-sm sm:text-base leading-relaxed">
+          Select our signature charcoal and timber fuels to learn how each imparts its distinctive sear and aroma.
+        </p>
+      </div>
+
+      <div class="mt-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        <!-- Wood Fuel Selectors -->
+        <div class="lg:col-span-5 flex flex-col gap-3" id="woodButtonsContainer">
+          <!-- Populated by script -->
+        </div>
+
+        <!-- Dynamic Wood Details Display Card -->
+        <div class="lg:col-span-7 bg-[#121217] border border-zinc-800 rounded-3xl p-6 sm:p-8 flex flex-col justify-between shadow-2xl relative overflow-hidden">
+          <div class="space-y-6">
+            <div class="flex items-center justify-between pb-4 border-b border-zinc-800">
+              <div>
+                <span class="text-xs font-mono text-amber-400 font-bold uppercase tracking-wider" id="woodFuelType">Signature Fuel</span>
+                <h3 class="font-display text-2xl font-bold text-white mt-1" id="woodFuelName">Japanese White Binchotan</h3>
+              </div>
+              <div class="px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-mono text-sm font-bold" id="woodFuelTemp">
+                850°F (Ultra Sear)
+              </div>
+            </div>
+
+            <p class="text-sm text-zinc-300 leading-relaxed" id="woodFuelDesc">
+              Hand-crafted from Kishu oak, burns with zero flame flare-ups to preserve delicate natural intramuscular fat.
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800">
+                <span class="text-[11px] uppercase font-bold text-zinc-400 block mb-1">Smoke Profile</span>
+                <p class="text-xs text-white font-medium" id="woodFuelSmoke">Smokeless High Radiant Heat</p>
+              </div>
+              <div class="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800">
+                <span class="text-[11px] uppercase font-bold text-zinc-400 block mb-1">Optimal Pairing</span>
+                <p class="text-xs text-white font-medium" id="woodFuelPairing">Rosemary Lamb Skewers & Wagyu Cuts</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-6 mt-6 border-t border-zinc-800 flex items-center justify-between">
+            <span class="text-xs text-zinc-400">Calibrated by Pitmaster Team</span>
+            <button onclick="openModal('simulatorModal')" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold transition flex items-center gap-1.5">
+              <i data-lucide="flame" class="w-3.5 h-3.5"></i>
+              <span>Simulate Searing</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. OUR HERITAGE & PHILOSOPHY SECTION -->
+  <section id="about" class="py-24 bg-[#0e0e12] border-t border-zinc-800/80 relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <!-- Visual Collage -->
+        <div class="lg:col-span-6 relative">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-4">
+              <div class="rounded-2xl overflow-hidden border border-zinc-800 aspect-[3/4] bg-zinc-900">
+                <img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80" alt="Grilling steaks on open flame" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+              </div>
+              <div class="p-4 rounded-2xl bg-zinc-900/90 border border-zinc-800 text-left">
+                <div class="text-amber-400 font-bold text-xl">45 Days</div>
+                <p class="text-xs text-zinc-400 mt-1">Himalayan Salt Dry-Aging Chamber for supreme tenderness.</p>
+              </div>
+            </div>
+
+            <div class="space-y-4 pt-8">
+              <div class="p-4 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/10 border border-amber-500/30 text-left">
+                <i data-lucide="flame" class="w-6 h-6 text-amber-400 mb-2"></i>
+                <div class="text-white font-bold text-base">White Binchotan</div>
+                <p class="text-xs text-zinc-300 mt-1">Smokeless high-heat charcoal that locks in natural meat juices.</p>
+              </div>
+
+              <div class="rounded-2xl overflow-hidden border border-zinc-800 aspect-[3/4] bg-zinc-900">
+                <img src="https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=600&q=80" alt="Chef seasoning prime steak" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="lg:col-span-6 space-y-6 text-left">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase tracking-wider">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            <span id="aboutBadge">Our Heritage & Philosophy</span>
+          </div>
+
+          <h2 id="aboutHeading" class="font-display text-3xl sm:text-4xl font-bold text-white tracking-tight leading-tight">
+            Born From The Passion For <br />
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-500">
+              Pure Fire & Handcrafted Cuts
+            </span>
+          </h2>
+
+          <p id="aboutDesc" class="text-zinc-300 text-sm sm:text-base leading-relaxed">
+            At The Elite Grill, we reject shortcuts. Every morning, our pits are stoked with natural oak, cherrywood, and Japanese white binchotan charcoal. We procure exclusively pasture-raised livestock, allowing each cut to age patiently in our temperature-controlled Himalayan rock salt vaults.
+          </p>
+
+          <div class="space-y-4 pt-2">
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 shrink-0 border border-amber-500/20">
+                <i data-lucide="award" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-white" id="aboutPillar1Title">Master Pitmaster Techniques</h4>
+                <p class="text-xs text-zinc-400 mt-0.5" id="aboutPillar1Desc">Decades of combined culinary expertise dedicated solely to wood-fired meat artistry.</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 shrink-0 border border-amber-500/20">
+                <i data-lucide="shield-check" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-white" id="aboutPillar2Title">Ethical & Pasture-Raised Sourcing</h4>
+                <p class="text-xs text-zinc-400 mt-0.5" id="aboutPillar2Desc">Directly partnered with local family-owned ranches with 100% grass-fed assurance.</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 shrink-0 border border-amber-500/20">
+                <i data-lucide="heart-handshake" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-white" id="aboutPillar3Title">Authentic Hearthside Hospitality</h4>
+                <p class="text-xs text-zinc-400 mt-0.5" id="aboutPillar3Desc">Uncompromising table service, pairing masterclasses, and customized cuts cooked to your exact request.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. MASTER FIRE-CRAFTED MENU SECTION -->
+  <section id="menu" class="py-24 bg-[#0a0a0d] border-t border-zinc-800/80 relative z-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-2xl mx-auto mb-10 space-y-3">
+        <span class="px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 text-xs font-semibold uppercase tracking-widest border border-amber-500/20" id="menuBadge">
+          Charcoal & Oak Masterpieces
+        </span>
+        <h2 id="menuHeading" class="font-display text-3xl sm:text-4xl font-extrabold text-white">Our Fire-Crafted Menu</h2>
+        <p id="menuSubtitle" class="text-sm text-zinc-400 leading-relaxed">Every cut is seasoned with hand-ground wild spices and seared over natural fruitwood charcoals.</p>
+      </div>
+
+      <!-- Search and Sort Bar -->
+      <div class="max-w-4xl mx-auto mb-8 grid grid-cols-1 sm:grid-cols-12 gap-3">
+        <div class="sm:col-span-8 relative">
+          <i data-lucide="search" class="w-4 h-4 text-zinc-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
+          <input type="text" id="menuSearchInput" placeholder="Search skewers, Wagyu steaks, seafood or sides..." class="w-full pl-11 pr-4 py-3 rounded-2xl bg-zinc-900/90 border border-zinc-800 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-amber-500 transition" />
+        </div>
+        <div class="sm:col-span-4">
+          <select id="menuSortSelect" class="w-full px-4 py-3 rounded-2xl bg-zinc-900/90 border border-zinc-800 text-sm text-white focus:outline-none focus:border-amber-500 transition cursor-pointer">
+            <option value="featured">Sort: Featured Cuts</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="rating">Highest Rated</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="flex flex-wrap items-center justify-center gap-2 mb-10" id="categoryFilters">
+        <button data-category="all" class="category-btn active px-4 py-2 rounded-xl text-xs font-semibold transition border border-amber-500 bg-amber-500 text-black">All Offerings</button>
+        <button data-category="skewers" class="category-btn px-4 py-2 rounded-xl text-xs font-semibold transition border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:border-amber-500/40 hover:text-white">Handcrafted Skewers</button>
+        <button data-category="steaks" class="category-btn px-4 py-2 rounded-xl text-xs font-semibold transition border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:border-amber-500/40 hover:text-white">Prime Steaks</button>
+        <button data-category="platters" class="category-btn px-4 py-2 rounded-xl text-xs font-semibold transition border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:border-amber-500/40 hover:text-white">Pitmaster Boards</button>
+        <button data-category="seafood" class="category-btn px-4 py-2 rounded-xl text-xs font-semibold transition border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:border-amber-500/40 hover:text-white">Seafood Hearth</button>
+        <button data-category="sides" class="category-btn px-4 py-2 rounded-xl text-xs font-semibold transition border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:border-amber-500/40 hover:text-white">Gourmet Sides</button>
+        <button data-category="drinks" class="category-btn px-4 py-2 rounded-xl text-xs font-semibold transition border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:border-amber-500/40 hover:text-white">Sides & Cellar</button>
+      </div>
+
+      <!-- Food Menu Grid (Populated dynamically) -->
+      <div id="menuGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </div>
+  </section>
+
+  <!-- 7. REVIEWS & MICHELIN PRAISE SECTION -->
+  <section id="reviews" class="py-24 bg-[#0c0c10] border-t border-zinc-800/80 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-12 border-b border-zinc-800 text-left">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-3">
+            <i data-lucide="award" class="w-3.5 h-3.5"></i>
+            <span id="reviewsBadge">Verified Culinary Reviews</span>
+          </div>
+          <h2 id="reviewsHeading" class="font-display text-3xl sm:text-4xl font-bold text-white tracking-tight">
+            What Food Lovers Say
+          </h2>
+          <p id="reviewsSubtitle" class="text-zinc-400 text-sm mt-1 max-w-lg">
+            From world-renowned culinary columnists to our cherished neighborhood regulars.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-4 bg-zinc-900/80 border border-zinc-800 rounded-2xl p-4 shrink-0">
+          <div class="text-3xl font-extrabold text-amber-400">4.9</div>
+          <div>
+            <div class="flex items-center gap-1 text-amber-400">
+              <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+              <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+            </div>
+            <span class="text-xs text-zinc-400 block mt-0.5">Based on 2,840+ genuine reviews</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8" id="reviewsGrid">
+        <!-- Populated by script -->
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. ITEM CUSTOMIZATION & DETAIL MODAL -->
+  <div id="dishModal" class="modal fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md">
+    <div class="relative w-full max-w-2xl bg-[#121216] border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <button onclick="closeModal('dishModal')" class="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/70 hover:bg-black text-zinc-300 hover:text-white border border-zinc-700/60 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="relative h-60 sm:h-72 w-full bg-black shrink-0">
+        <img id="dishModalImg" src="" alt="" class="w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-gradient-to-t from-[#121216] via-black/30 to-transparent"></div>
+        <div class="absolute bottom-4 left-6 right-6 flex items-end justify-between">
+          <div>
+            <div class="flex items-center gap-2 mb-1.5" id="dishModalBadges"></div>
+            <h3 id="dishModalTitle" class="font-display text-xl sm:text-2xl font-bold text-white"></h3>
+          </div>
+          <span id="dishModalPrice" class="text-xl sm:text-2xl font-bold text-amber-400 font-display"></span>
+        </div>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-6 flex-1 text-left">
+        <p id="dishModalDesc" class="text-sm text-zinc-300 leading-relaxed"></p>
+
+        <!-- Doneness Options -->
+        <div id="dishModalDonenessSection" class="space-y-2">
+          <label class="block text-xs font-semibold text-zinc-300 uppercase tracking-wide">Cooking Doneness</label>
+          <div class="grid grid-cols-3 gap-2" id="dishModalDonenessBtns"></div>
+        </div>
+
+        <!-- Spiciness Options -->
+        <div id="dishModalSpicinessSection" class="space-y-2">
+          <label class="block text-xs font-semibold text-zinc-300 uppercase tracking-wide">Spice Level</label>
+          <div class="grid grid-cols-3 gap-2" id="dishModalSpicinessBtns"></div>
+        </div>
+
+        <!-- Gourmet Side Choice -->
+        <div id="dishModalSidesSection" class="space-y-2">
+          <label class="block text-xs font-semibold text-zinc-300 uppercase tracking-wide">Included Gourmet Side</label>
+          <select id="dishModalSidesSelect" class="w-full px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-white focus:outline-none focus:border-amber-500"></select>
+        </div>
+
+        <!-- Chef Cooking Notes -->
+        <div class="space-y-2">
+          <label class="block text-xs font-semibold text-zinc-300 uppercase tracking-wide">Special Cooking Instructions</label>
+          <textarea id="dishModalNotes" rows="2" placeholder="e.g. Extra garlic butter, salt on side, crispy char..." class="w-full px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-white focus:outline-none focus:border-amber-500 resize-none"></textarea>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 sm:p-6 border-t border-zinc-800 bg-[#0d0d10] flex items-center justify-between gap-4 shrink-0">
+        <div class="flex items-center gap-3 bg-zinc-900 px-3 py-1.5 rounded-xl border border-zinc-800">
+          <button onclick="changeDishModalQty(-1)" class="text-zinc-400 hover:text-white font-bold text-sm px-2">-</button>
+          <span id="dishModalQty" class="text-sm font-bold font-mono text-white">1</span>
+          <button onclick="changeDishModalQty(1)" class="text-zinc-400 hover:text-white font-bold text-sm px-2">+</button>
+        </div>
+        <button onclick="confirmDishModalAdd()" class="flex-1 py-3 px-6 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-black font-bold text-xs sm:text-sm tracking-wide transition shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2">
+          <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+          <span>Add to Smokehouse Order • <span id="dishModalTotalPrice">$0.00</span></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. PITMASTER GRILL SIMULATOR MODAL -->
+  <div id="simulatorModal" class="modal fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div class="relative w-full max-w-2xl bg-[#111116] border border-amber-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-4 border-b border-zinc-800">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+            <i data-lucide="flame" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-display text-lg font-bold text-white">Pitmaster Searing Simulator</h3>
+            <p class="text-xs text-zinc-400">Calibrate meat cuts, coal temperature, and wood smoke.</p>
+          </div>
+        </div>
+        <button onclick="closeModal('simulatorModal')" class="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-6 pt-5">
+        <div>
+          <label class="block text-xs font-semibold text-zinc-300 mb-2">1. Select Meat / Seafood Cut</label>
+          <div class="grid grid-cols-3 gap-3">
+            <button onclick="selectSimulatorCut('wagyu', this)" class="sim-cut-btn active p-3 rounded-xl border border-amber-500 bg-amber-500/15 text-left transition">
+              <span class="block text-xs font-bold text-white">Wagyu Ribeye</span>
+              <span class="text-[10px] text-amber-400">$38.00</span>
+            </button>
+            <button onclick="selectSimulatorCut('lamb', this)" class="sim-cut-btn p-3 rounded-xl border border-zinc-800 bg-zinc-900/80 text-left transition hover:border-zinc-700">
+              <span class="block text-xs font-bold text-white">Rosemary Lamb</span>
+              <span class="text-[10px] text-amber-400">$26.00</span>
+            </button>
+            <button onclick="selectSimulatorCut('prawns', this)" class="sim-cut-btn p-3 rounded-xl border border-zinc-800 bg-zinc-900/80 text-left transition hover:border-zinc-700">
+              <span class="block text-xs font-bold text-white">Tiger Prawns</span>
+              <span class="text-[10px] text-amber-400">$29.00</span>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-zinc-300 mb-2">2. Natural Wood Selection</label>
+          <div class="grid grid-cols-3 gap-3">
+            <button onclick="selectSimulatorWood('White Oak', this)" class="sim-wood-btn active p-2.5 rounded-xl border border-amber-500 bg-amber-500/10 text-xs font-semibold text-white text-center">White Oak</button>
+            <button onclick="selectSimulatorWood('Applewood', this)" class="sim-wood-btn p-2.5 rounded-xl border border-zinc-800 bg-zinc-900 text-xs font-semibold text-zinc-400 text-center hover:border-zinc-700">Sweet Applewood</button>
+            <button onclick="selectSimulatorWood('Texas Hickory', this)" class="sim-wood-btn p-2.5 rounded-xl border border-zinc-800 bg-zinc-900 text-xs font-semibold text-zinc-400 text-center hover:border-zinc-700">Texas Hickory</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between text-xs mb-2">
+            <span class="text-zinc-300 font-semibold">3. Pit Searing Temperature</span>
+            <span id="tempDisplay" class="font-mono text-amber-400 font-bold">650°F</span>
+          </div>
+          <input type="range" min="450" max="850" value="650" id="tempSlider" class="w-full accent-amber-500 cursor-pointer" />
+        </div>
+
+        <div class="relative h-44 rounded-2xl bg-zinc-950 border border-zinc-800 overflow-hidden flex flex-col items-center justify-center">
+          <div id="searCutVisual" class="relative w-36 h-24 rounded-2xl bg-gradient-to-r from-red-900 via-rose-950 to-red-900 border border-amber-500/30 flex items-center justify-center transition-all duration-700 shadow-xl">
+            <div id="charMarks" class="opacity-0 transition-opacity duration-700 font-display text-[10px] text-amber-300 font-bold tracking-widest uppercase">
+              🔥 CRISP CHAR
+            </div>
+          </div>
+          <p id="searDonenessText" class="text-xs text-amber-400 font-semibold mt-3 font-mono">Medium Rare (Internal: 135°F)</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <button onclick="triggerSimulatorSear()" class="py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition">
+            <i data-lucide="flame" class="w-4 h-4 text-amber-400"></i>
+            <span>Ignite Sear (Audio FX)</span>
+          </button>
+          <button onclick="addCustomSearToCart()" class="py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-amber-500/20">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Add Custom Cut to Order</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. SOMMELIER & FLAVOR PAIRING GUIDE MODAL -->
+  <div id="pairingModal" class="modal fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div class="relative w-full max-w-2xl bg-[#111116] border border-amber-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-4 border-b border-zinc-800">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+            <i data-lucide="wine" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-display text-lg font-bold text-white">Sommelier & Flavor Pairing Guide</h3>
+            <p class="text-xs text-zinc-400">Master pairings of wood-smoke cuts with vintage cellars and crafted sauces.</p>
+          </div>
+        </div>
+        <button onclick="closeModal('pairingModal')" class="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="mt-6 space-y-4" id="pairingCardsList">
+        <!-- Populated by script -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 11. TABLE RESERVATION MODAL -->
+  <div id="reservationModal" class="modal fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div class="relative w-full max-w-lg bg-[#111116] border border-amber-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-4 border-b border-zinc-800">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+            <i data-lucide="calendar" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-display text-lg font-bold text-white">Reserve a Hearth Table</h3>
+            <p class="text-xs text-zinc-400">Guaranteed hearthside seating with VIP pitmaster service.</p>
+          </div>
+        </div>
+        <button onclick="closeModal('reservationModal')" class="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="reservationForm" class="space-y-4 pt-4">
+        <div>
+          <label class="block text-xs font-semibold text-zinc-300 mb-1">Full Guest Name</label>
+          <input type="text" required placeholder="Alexander Vance" class="w-full px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white focus:outline-none focus:border-amber-500" />
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-zinc-300 mb-1">Date</label>
+            <input type="date" required class="w-full px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white focus:outline-none focus:border-amber-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-zinc-300 mb-1">Time Slot</label>
+            <select class="w-full px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white focus:outline-none focus:border-amber-500">
+              <option>06:00 PM</option>
+              <option>07:00 PM (Prime Searing)</option>
+              <option>08:00 PM</option>
+              <option>09:15 PM</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-zinc-300 mb-1">Party Size & Zone</label>
+          <select class="w-full px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white focus:outline-none focus:border-amber-500">
+            <option>2 Guests • Hearth Room</option>
+            <option>4 Guests • Chef's Counter (Open Flame Front)</option>
+            <option>6-8 Guests • Private Patio (VIP Pitmaster Experience)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-zinc-300 mb-1">Special Occasion or Dietary Note</label>
+          <input type="text" placeholder="e.g. Anniversary dinner, birthday celebration..." class="w-full px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white focus:outline-none focus:border-amber-500" />
+        </div>
+        <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-black font-bold text-sm tracking-wide transition shadow-lg shadow-amber-500/20 mt-2">
+          Confirm Reservation
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 12. CART DRAWER (WITH DELIVERY / PICKUP / DINE-IN) -->
+  <div id="cartDrawer" class="fixed inset-y-0 right-0 w-full max-w-md bg-[#111116] border-l border-zinc-800 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
+    <div class="p-6 border-b border-zinc-800 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <i data-lucide="shopping-bag" class="w-5 h-5 text-amber-400"></i>
+        <h3 class="font-display text-lg font-bold text-white">Smokehouse Order</h3>
+      </div>
+      <button onclick="toggleCartDrawer(false)" class="p-2 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <!-- Order Mode Selector -->
+    <div class="p-4 border-b border-zinc-800/80 bg-zinc-950/60 flex items-center gap-2">
+      <button onclick="setOrderMode('delivery')" id="orderModeDelivery" class="order-mode-btn flex-1 py-1.5 rounded-xl text-xs font-semibold bg-amber-500 text-black">Delivery</button>
+      <button onclick="setOrderMode('pickup')" id="orderModePickup" class="order-mode-btn flex-1 py-1.5 rounded-xl text-xs font-semibold bg-zinc-900 text-zinc-400 hover:text-white">Pickup</button>
+      <button onclick="setOrderMode('dinein')" id="orderModeDinein" class="order-mode-btn flex-1 py-1.5 rounded-xl text-xs font-semibold bg-zinc-900 text-zinc-400 hover:text-white">Dine-In</button>
+    </div>
+
+    <!-- Cart items list -->
+    <div id="cartItemsList" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
+
+    <!-- Cart pricing & Checkout footer -->
+    <div class="p-6 border-t border-zinc-800 bg-[#0d0d10] space-y-3">
+      <div class="flex gap-2">
+        <input type="text" id="promoInput" placeholder="Promo code (Try: SHANAKA-VIP)" class="flex-1 px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-white uppercase focus:outline-none focus:border-amber-500" />
+        <button onclick="applyPromoCode()" class="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-xs transition">Apply</button>
+      </div>
+      <div id="promoNotice" class="text-[11px] hidden font-medium"></div>
+
+      <div class="space-y-1.5 text-xs text-zinc-400 pt-2 border-t border-zinc-800">
+        <div class="flex justify-between">
+          <span>Subtotal</span>
+          <span id="cartSubtotal" class="text-white font-mono">$0.00</span>
+        </div>
+        <div class="flex justify-between" id="deliveryRow">
+          <span id="deliveryLabel">Delivery Fee</span>
+          <span id="cartDelivery" class="text-white font-mono">$4.50</span>
+        </div>
+        <div class="flex justify-between" id="discountRow" style="display: none;">
+          <span class="text-emerald-400">VIP Discount (<span id="discountPercent">0</span>%)</span>
+          <span id="cartDiscount" class="text-emerald-400 font-mono">-$0.00</span>
+        </div>
+        <div class="flex justify-between font-bold text-sm text-white pt-2 border-t border-zinc-800">
+          <span>Total</span>
+          <span id="cartTotal" class="text-amber-400 font-mono text-base">$0.00</span>
+        </div>
+      </div>
+
+      <button onclick="openCheckoutModal()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-black font-bold text-sm tracking-wide transition shadow-lg shadow-amber-500/20">
+        Proceed to Checkout
+      </button>
+    </div>
+  </div>
+  <div id="cartBackdrop" onclick="toggleCartDrawer(false)" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 hidden transition-opacity"></div>
+
+  <!-- 13. CHECKOUT MODAL -->
+  <div id="checkoutModal" class="modal fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div class="relative w-full max-w-lg bg-[#121217] border border-zinc-800 rounded-3xl shadow-2xl p-6 sm:p-8 max-h-[92vh] overflow-y-auto">
+      <button onclick="closeModal('checkoutModal')" class="absolute top-5 right-5 z-10 p-2 rounded-full bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- View 1: Form -->
+      <div id="checkoutFormView">
+        <div class="flex items-center gap-3 pb-4 border-b border-zinc-800 mb-5">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+            <i data-lucide="credit-card" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-display text-lg font-bold text-white">Finalize Smokehouse Order</h3>
+            <p class="text-xs text-zinc-400">Total payable: <span id="checkoutTotalAmount" class="text-amber-400 font-mono font-bold">$0.00</span></p>
+          </div>
+        </div>
+
+        <form id="checkoutForm" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-zinc-300 mb-1">Full Name</label>
+            <input type="text" id="custName" required placeholder="Guest Name" class="w-full px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white focus:outline-none focus:border-amber-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-zinc-300 mb-1">Contact Phone</label>
+            <input type="tel" id="custPhone" required placeholder="+1 (555) 000-0000" class="w-full px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white focus:outline-none focus:border-amber-500" />
+          </div>
+          <div id="checkoutAddressField">
+            <label class="block text-xs font-semibold text-zinc-300 mb-1">Delivery Address</label>
+            <input type="text" id="custAddress" placeholder="Street Address, City, Postal Code" class="w-full px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white focus:outline-none focus:border-amber-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-zinc-300 mb-1">Payment Method</label>
+            <div class="grid grid-cols-3 gap-2">
+              <button type="button" onclick="selectPayMethod('card', this)" class="pay-btn active py-2.5 px-3 rounded-xl border border-amber-500 bg-amber-500/15 text-white text-xs font-semibold text-center">Credit Card</button>
+              <button type="button" onclick="selectPayMethod('cash', this)" class="pay-btn py-2.5 px-3 rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-400 text-xs font-semibold text-center">Cash on Deliv.</button>
+              <button type="button" onclick="selectPayMethod('digital', this)" class="pay-btn py-2.5 px-3 rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-400 text-xs font-semibold text-center">Apple / GPay</button>
+            </div>
+          </div>
+          <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-black font-bold text-sm tracking-wide transition shadow-lg shadow-amber-500/20 mt-4 flex items-center justify-center gap-2">
+            <span>Confirm & Place Order</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </form>
+      </div>
+
+      <!-- View 2: Order Confirmed Success Screen -->
+      <div id="checkoutSuccessView" class="hidden text-center space-y-6 py-6">
+        <div class="w-16 h-16 bg-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center mx-auto border border-amber-500/40 animate-bounce">
+          <i data-lucide="check-circle" class="w-8 h-8 text-amber-400"></i>
+        </div>
+        <div class="space-y-2">
+          <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 text-xs font-semibold">
+            <i data-lucide="flame" class="w-3.5 h-3.5"></i>
+            <span>Kitchen Received Order</span>
+          </span>
+          <h3 class="font-display text-2xl sm:text-3xl font-bold text-white">Flames Are Burning!</h3>
+          <p class="text-zinc-400 text-xs sm:text-sm max-w-sm mx-auto" id="orderSuccessMessage">
+            Thank you! Your order has been dispatched to our master pitmasters. Estimated preparation time: 20-25 mins.
+          </p>
+        </div>
+        <div class="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800 text-left space-y-2 text-xs">
+          <div class="flex justify-between">
+            <span class="text-zinc-400">Order ID:</span>
+            <span id="orderSuccessId" class="text-amber-400 font-mono font-bold">EG-ORD-74921</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-zinc-400">Estimated Delivery/Pickup:</span>
+            <span class="text-white font-medium">25 minutes</span>
+          </div>
+        </div>
+        <button onclick="finishCheckout()" class="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm transition">
+          Return to Smokehouse
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 14. FOOTER -->
+  <footer class="bg-[#070709] border-t border-zinc-800/80 pt-16 pb-12 relative z-20 text-zinc-400 text-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-zinc-800/60">
+        <div class="space-y-4 md:col-span-2">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-black font-bold">
+              <i data-lucide="flame" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <span class="font-display text-xl font-bold tracking-wider text-white">The Elite Grill</span>
+              <span class="block text-[10px] tracking-[0.25em] text-amber-500 font-semibold uppercase">Wood-Fired Smokehouse</span>
+            </div>
+          </div>
+          <p class="text-xs text-zinc-400 max-w-sm leading-relaxed">
+            Finest wood-fired kitchen combining 850°F open hearths, 45-day dry-aged cuts, and artisanal hospitality.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="text-white font-display text-xs font-bold uppercase tracking-wider mb-4">Location & Hours</h4>
+          <p class="text-xs text-zinc-400 leading-relaxed">
+            42 Grand Hearth Ave<br />Culinary Arts District<br />Mon – Sun: 12:00 PM – 11:30 PM
+          </p>
+        </div>
+
+        <div>
+          <h4 class="text-white font-display text-xs font-bold uppercase tracking-wider mb-4">Reservations</h4>
+          <p class="text-xs text-zinc-400 leading-relaxed mb-2">
+            Phone: +1 (800) 555-GRILL<br />Email: concierge@elitegrill.com
+          </p>
+        </div>
+      </div>
+
+      <!-- COPYRIGHT -->
+      <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-400">
+        <p class="font-semibold text-zinc-200 tracking-wide">
+          © SHANAKA DIMUTH. All rights reserved.
+        </p>
+        <div class="flex items-center gap-4 text-zinc-400">
+          <a href="#" class="hover:text-zinc-200">Privacy Policy</a>
+          <span>•</span>
+          <a href="#" class="hover:text-zinc-200">Terms of Dining</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- External Script -->
+  <script src="script.js"></script>
+</body>
+</html>
